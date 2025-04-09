@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./user-service:/usr/src/app
+    working_dir: /usr/src/app
+    environment:
+      - PYTHONPATH=/usr/src/app
+    ports:
+      - "5001:5001"
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 5001
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  book-service:
+    build:
+      context: ./book-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./book-service:/usr/src/app
+    working_dir: /usr/src/app
+    environment:
+      - PYTHONPATH=/usr/src/app
+    ports:
+      - "5002:5002"
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 5002
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_USER: lms_user1
+      MYSQL_PASSWORD: lms_pass1
+      MYSQL_DATABASE: lms_users  # MySQL only creates one DB at init, others via SQL
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql_data:
