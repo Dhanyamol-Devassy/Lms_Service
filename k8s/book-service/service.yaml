@@ -10,4 +10,4 @@ spec:
     - protocol: TCP
       port: 5002
       targetPort: 5002
-  type: NodePort
+  type: ClusterIP  # ClusterIP for internal DNS resolution
