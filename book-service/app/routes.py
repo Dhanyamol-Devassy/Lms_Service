@@ -3,8 +3,11 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Book
 from app.schemas import BookCreate, BookUpdate, BookResponse
+import requests
 
 router = APIRouter(prefix="/books", tags=["Books"])
+
+BOOK_SERVICE_URL = "http://borrowing-service:5003"  # Borrowing service URL
 
 @router.post("/", response_model=BookResponse)
 def add_book(book: BookCreate, db: Session = Depends(get_db)):
@@ -51,3 +54,14 @@ def delete_book(book_id: int, db: Session = Depends(get_db)):
     db.delete(book)
     db.commit()
     return {"message": "Book deleted successfully"}
+
+@router.put("/borrow/{book_id}")
+def update_book_availability(book_id: int, available: bool, db: Session = Depends(get_db)):
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    book.available = available
+    db.commit()
+    db.refresh(book)
+    return {"message": "Book availability updated"}

@@ -44,7 +44,7 @@ INSERT INTO books (title, author, isbn, available) VALUES
 -- lms_borrowing schema
 USE lms_borrowing;
 
-CREATE TABLE IF NOT EXISTS borrowings (
+CREATE TABLE IF NOT EXISTS borrowing (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     book_id INT NOT NULL,

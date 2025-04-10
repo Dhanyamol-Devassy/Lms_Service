@@ -127,8 +127,8 @@ docker-compose up --build
 ```
 
 5. **Access services**
-- User Service: http://localhost:5001
-- Book Service: http://localhost:5002
+- User Service: http://localhost:5001/docs
+- Book Service: http://localhost:5002/docs
 - Borrowing Service: http://localhost:5003
 
 ---
@@ -158,6 +158,16 @@ kubectl apply -f user-service-deployment.yaml
 kubectl apply -f book-service-deployment.yaml
 kubectl apply -f borrowing-service-deployment.yaml
 Repeat this for all the yaml files inside K8s/..
+```
+
+## Access via Port-Forwarding (for ClusterIP services)
+```
+Since services are of type ClusterIP, we can port-forward to access them locally.
+
+kubectl port-forward service/book-service 5002:5002
+kubectl port-forward service/user-service 5001:5001
+kubectl port-forward service/borrowing-service 5003:5003
+
 ```
 
 ## 📄 Environment Security Tips

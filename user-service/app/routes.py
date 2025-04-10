@@ -1,16 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import User
-from app.schemas import UserCreate, UserResponse
+from app.models import User, Borrowing, Book
+from app.schemas import UserCreate, UserResponse, BorrowingResponse
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt
-from app.schemas import UserLogin, TokenResponse
-from app.models import User
-from app.auth import create_access_token, hash_password, verify_password
 import os
 from dotenv import load_dotenv
+import requests
 
 load_dotenv()
 
@@ -65,13 +63,30 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 def list_users(db: Session = Depends(get_db)):
     return db.query(User).all()
 
-# Get User by ID
+# Get User by ID with borrowed books information
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    
+    # Get borrowed books for the user (if any)
+    borrowings = db.query(Borrowing).filter(Borrowing.user_id == user_id).all()
+    borrowed_books = []
+    for borrowing in borrowings:
+        book = db.query(Book).filter(Book.id == borrowing.book_id).first()
+        if book:
+            borrowed_books.append({"borrow_id": borrowing.id, "book_id": book.id, "title": book.title})
+    
+    # Include borrowed books in the user response
+    user_response = UserResponse(
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        borrowed_books=borrowed_books
+    )
+    
+    return user_response
 
 # Update User Information
 @router.put("/{user_id}", response_model=UserResponse)

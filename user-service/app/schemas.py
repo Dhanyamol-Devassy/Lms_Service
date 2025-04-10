@@ -9,6 +9,7 @@ class UserResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
+    borrowed_books: List[BorrowedBook] = []
 
     class Config:
         orm_mode = True

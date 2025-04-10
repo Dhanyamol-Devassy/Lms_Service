@@ -7,3 +7,4 @@ class Borrowing(db.Model):
     book_id = db.Column(db.Integer, nullable=False)
     borrowed_at = db.Column(db.DateTime, default=datetime.utcnow)
     returned_at = db.Column(db.DateTime, nullable=True)
+    
