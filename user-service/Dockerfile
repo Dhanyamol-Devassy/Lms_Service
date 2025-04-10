@@ -1,18 +1,18 @@
-# Use official Python base image
 FROM python:3.11-slim
 
-# Set working directory
+# Add non-root user
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
+# Install mysql-client for wait-for.sh and other essentials
+RUN apt-get update && apt-get install -y default-mysql-client && apt-get clean
+
 WORKDIR /usr/src/app
 
-# Copy requirements file and install dependencies
-COPY requirements.txt .
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy your application code
 COPY . .
 
-# Expose port for the FastAPI application
-EXPOSE 5001
+USER appuser
 
-# Command to run FastAPI with uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5001"]
+CMD ["sh", "-c", "chmod +x wait-for.sh && ./wait-for.sh mysql uvicorn app.main:app --host=0.0.0.0 --port=5001 --reload"]

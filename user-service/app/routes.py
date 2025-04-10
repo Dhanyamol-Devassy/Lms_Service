@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from jose import jwt
 from app.schemas import UserLogin, TokenResponse
 from app.models import User
+from app.auth import create_access_token, hash_password, verify_password
 import os
 from dotenv import load_dotenv
 
@@ -24,13 +25,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
+
 @router.post("/login", response_model=TokenResponse)
 def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_credentials.email).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    
-    if not verify_password(user_credentials.password, user.password):
+    if not user or not verify_password(user_credentials.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
     token = create_access_token({"sub": user.email})
