@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: book-service-config
+  labels:
+    app: book-service
+data:
+  db-user: lms_user1
+  db-host: mysql
+  db-port: "3306"
+  db-name: lms_books
+  database-url: mysql+mysqlconnector://lms_user1:lms_pass1@mysql:3306/lms_books
+  algorithm: HS256
+  access-token-expire-minutes: "30"

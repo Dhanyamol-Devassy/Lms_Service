@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: book-service
+  template:
+    metadata:
+      labels:
+        app: book-service
+    spec:
+      containers:
+        - name: book-service
+          image: book-service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: book-service-config
+                  key: db-user
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: book-service-config
+                  key: db-host
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: book-service-config
+                  key: db-port
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: book-service-config
+                  key: db-name
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: book-service-config
+                  key: database-url
+            - name: ALGORITHM
+              valueFrom:
+                configMapKeyRef:
+                  name: book-service-config
+                  key: algorithm
+            - name: ACCESS_TOKEN_EXPIRE_MINUTES
+              valueFrom:
+                configMapKeyRef:
+                  name: book-service-config
+                  key: access-token-expire-minutes
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: book-service-secret
+                  key: db-password
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: book-service-secret
+                  key: secret-key
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: book-service-secret
+                  key: mysql-root-password
+          ports:
+            - containerPort: 5002
+          command: ["sh", "-c", "./wait-for.sh mysql && uvicorn app.main:app --host 0.0.0.0 --port 5002"]

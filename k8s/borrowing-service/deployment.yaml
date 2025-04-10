@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: borrowing-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: borrowing-service
+  template:
+    metadata:
+      labels:
+        app: borrowing-service
+    spec:
+      containers:
+        - name: borrowing-service
+          image: borrowing-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5003  # Port number your borrowing service will use
+          env:
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: borrowing-service-config
+                  key: db-user
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: borrowing-service-config
+                  key: db-host
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: borrowing-service-config
+                  key: db-port
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: borrowing-service-config
+                  key: db-name
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: borrowing-service-secret
+                  key: database-url  # Using Secret for database URL
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: borrowing-service-secret
+                  key: db-password

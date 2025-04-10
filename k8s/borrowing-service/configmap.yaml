@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: borrowing-service-config
+  labels:
+    app: borrowing-service
+data:
+  db-user: lms_user1
+  db-host: mysql
+  db-port: "3306"
+  db-name: lms_borrowing
+  algorithm: HS256
+  access-token-expire-minutes: "30"

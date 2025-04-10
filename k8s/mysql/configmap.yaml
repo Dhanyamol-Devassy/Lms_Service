@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  labels:
+    app: mysql
+data:
+  MYSQL_DATABASE: lms_users
+  MYSQL_USER: lms_user1
+  MYSQL_PORT: "3306"
+  my.cnf: |
+    [mysqld]
+    bind-address = 0.0.0.0
+    skip-name-resolve
+    skip-host-cache

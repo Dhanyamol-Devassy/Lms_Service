@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+spec:
+  capacity:
+    storage: 5Gi  # Adjust the size as needed
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /mnt/data/mysql  # Local path on the node (can be replaced with cloud storage)

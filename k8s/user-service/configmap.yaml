@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+  labels:
+    app: user-service
+data:
+  db-user: lms_user1
+  db-host: mysql  # Ensure this matches the MySQL service name
+  db-port: "3306"
+  db-name: lms_users
+  algorithm: HS256
+  access-token-expire-minutes: "30"

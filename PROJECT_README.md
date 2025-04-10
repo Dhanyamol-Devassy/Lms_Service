@@ -46,6 +46,7 @@ LMS_SERVICE/
 - Docker & Docker Compose
 - JWT (Authentication)
 - SQLAlchemy ORM
+- Kubernetes for container orchestration
 
 ---
 
@@ -55,6 +56,8 @@ LMS_SERVICE/
 
 - Docker
 - Docker Compose
+- Kubernetes (Minikube or similar)
+- kubectl
 
 ### 🛠️ Setup Instructions
 
@@ -62,6 +65,7 @@ LMS_SERVICE/
 ```bash
 git clone https://github.com/Dhanyamol-Devassy/Lms_Service.git
 cd LMS_SERVICE
+
 ```
 
 2. **Make `wait-for.sh` executable**
@@ -71,7 +75,7 @@ chmod +x wait-for.sh
 
 3. **Set up `.env` files**
 
-Each service has a `.env.example` file. Copy it and fill in credentials:
+Each service has a `.env.example` file. Copy it to a new file named .env and fill in credentials:
 
 #### Global `.env.example`
 ```
@@ -143,6 +147,18 @@ Test endpoints with:
 - Postman / Insomnia / cURL
 
 ---
+
+## Kubernetes Setup
+```
+Run the following commands to apply the MySQL, user, book, and borrowing services to Kubernetes:
+
+kubectl apply -f mysql-secret.yaml
+kubectl apply -f mysql-configmap.yaml
+kubectl apply -f user-service-deployment.yaml
+kubectl apply -f book-service-deployment.yaml
+kubectl apply -f borrowing-service-deployment.yaml
+Repeat this for all the yaml files inside K8s/..
+```
 
 ## 📄 Environment Security Tips
 

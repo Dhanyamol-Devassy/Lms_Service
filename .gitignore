@@ -11,4 +11,6 @@ user-service/.env
 book-service/.env
 borrowing-service/.env
 
-
+#k8s/user-service/secrets.yaml
+#k8s/borrowing-service/secrets.yaml
+#k8s/book-service/secrets.yaml
