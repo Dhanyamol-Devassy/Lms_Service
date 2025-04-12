@@ -12,6 +12,7 @@ spec:
       labels:
         app: book-service
     spec:
+      serviceAccountName: book-service-account  # 👈 Added for RBAC
       containers:
         - name: book-service
           image: book-service:latest
@@ -23,7 +24,7 @@ spec:
                   name: book-service-config
                   key: db-user
             - name: DB_HOST
-              value: "mysql"  # MySQL service name
+              value: "mysql"
             - name: DB_PORT
               valueFrom:
                 configMapKeyRef:
@@ -61,4 +62,11 @@ spec:
                   key: secret-key
           ports:
             - containerPort: 5002
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
           command: ["sh", "-c", "./wait-for.sh mysql && uvicorn app.main:app --host 0.0.0.0 --port 5002"]

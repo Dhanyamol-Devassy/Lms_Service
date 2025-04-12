@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from app.routes import router as book_router
 from app.database import Base, engine
 from sqlalchemy.exc import OperationalError
+from prometheus_fastapi_instrumentator import Instrumentator
+
 import time
 
 app = FastAPI(title="Book Service")
@@ -18,4 +20,4 @@ for i in range(10):
 
 # Include the router
 app.include_router(book_router)
-
+Instrumentator().instrument(app).expose(app)

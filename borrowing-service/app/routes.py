@@ -1,56 +1,79 @@
 import requests
-from fastapi import APIRouter, HTTPException
+from flask import Blueprint, jsonify, request
 from app.database import db
-from app.models import Borrowing, Book, User
+from app.models import Borrowing
 from datetime import datetime
+import os
 
-router = APIRouter()
+bp = Blueprint("borrowing", __name__)
 
-# Correct URLs for the user-service and book-service
-USER_SERVICE_URL = "http://user-service:5001/users/{user_id}"  # Replace with actual user-service URL
-BOOK_SERVICE_URL = "http://book-service:5002/books/{book_id}"  # Replace with actual book-service URL
+USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://user-service:5001/users")
+BOOK_SERVICE_URL = os.getenv("BOOK_SERVICE_URL", "http://book-service:5002/books")
 
-# Borrow Book
-@router.post("/borrow")
-def borrow_book(user_id: int, book_id: int):
-    # Check if the user exists by calling the user service
-    user_response = requests.get(f"{USER_SERVICE_URL}/{user_id}")
-    if user_response.status_code != 200:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Check if the book exists and is available by calling the book service
-    book_response = requests.get(f"{BOOK_SERVICE_URL}/{book_id}")
-    if book_response.status_code != 200:
-        raise HTTPException(status_code=404, detail="Book not found")
-    
-    book = book_response.json()
-    if not book['available']:
-        raise HTTPException(status_code=400, detail="Book is not available")
-    
-    # Create the borrowing record
+@bp.route("/borrow", methods=["POST"])
+def borrow_book():
+    user_id = request.json.get("user_id")
+    book_id = request.json.get("book_id")
+
+    # Validate user
+    try:
+        user_response = requests.get(f"{USER_SERVICE_URL}/{user_id}")
+        if user_response.status_code == 404:
+            return jsonify({"error": f"User {user_id} not found"}), 404
+        elif user_response.status_code != 200:
+            return jsonify({"error": "User service error"}), 502
+    except requests.RequestException:
+        return jsonify({"error": "Failed to connect to user service"}), 503
+
+    # Validate book
+    try:
+        book_response = requests.get(f"{BOOK_SERVICE_URL}/{book_id}")
+        if book_response.status_code == 404:
+            return jsonify({"error": f"Book {book_id} not found"}), 404
+        elif book_response.status_code != 200:
+            return jsonify({"error": "Book service error"}), 502
+        book = book_response.json()
+    except requests.RequestException:
+        return jsonify({"error": "Failed to connect to book service"}), 503
+
+    if not book.get("available", False):
+        return jsonify({"error": "Book is not available"}), 400
+
+    # Create borrowing record
     borrowing = Borrowing(user_id=user_id, book_id=book_id)
     db.session.add(borrowing)
     db.session.commit()
 
-    # Update book availability to False
-    book['available'] = False
-    requests.put(f"{BOOK_SERVICE_URL}/{book_id}", json=book)
+    try:
+        requests.put(f"{BOOK_SERVICE_URL}/borrow/{book_id}?available=false")
+    except requests.RequestException:
+        return jsonify({"error": "Failed to update book availability"}), 503
 
-    return {"message": "Book borrowed successfully"}
+    try:
+        requests.post(f"{USER_SERVICE_URL}/{user_id}/add-borrowed", json={"book_id": book_id})
+    except requests.RequestException:
+        return jsonify({"error": "Failed to update user borrowed list"}), 503
 
-# Return Book
-@router.put("/return/{borrow_id}")
-def return_book(borrow_id: int):
+    return jsonify({"message": "Book borrowed successfully"}), 200
+
+
+@bp.route("/return/<int:borrow_id>", methods=["PUT"])
+def return_book(borrow_id):
     borrowing = Borrowing.query.get(borrow_id)
     if not borrowing:
-        raise HTTPException(status_code=404, detail="Borrowing not found")
+        return jsonify({"error": "Borrowing record not found"}), 404
 
     borrowing.returned_at = datetime.utcnow()
     db.session.commit()
 
-    # Update book availability to True
-    book = requests.get(f"{BOOK_SERVICE_URL}/{borrowing.book_id}").json()
-    book['available'] = True
-    requests.put(f"{BOOK_SERVICE_URL}/{borrowing.book_id}", json=book)
+    try:
+        requests.put(f"{BOOK_SERVICE_URL}/borrow/{borrowing.book_id}?available=true")
+    except requests.RequestException:
+        return jsonify({"error": "Failed to update book availability"}), 503
 
-    return {"message": "Book returned successfully"}
+    try:
+        requests.post(f"{USER_SERVICE_URL}/{borrowing.user_id}/remove-borrowed", json={"book_id": borrowing.book_id})
+    except requests.RequestException:
+        return jsonify({"error": "Failed to update user borrowed list"}), 503
+
+    return jsonify({"message": "Book returned successfully"}), 200

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: book-service-account
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: book-service-role
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: book-service-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: book-service-account
+    namespace: default
+roleRef:
+  kind: Role
+  name: book-service-role
+  apiGroup: rbac.authorization.k8s.io

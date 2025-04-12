@@ -5,7 +5,10 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    email = Column(String(100), unique=True, index=True, nullable=False)
-    password = Column(String(255), nullable=False)  # Hashed password
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=False)
+    role = Column(String)
     
+    # Stores book IDs as a comma-separated string like "1,3,5"
+    borrowed_books = Column(String, default="")

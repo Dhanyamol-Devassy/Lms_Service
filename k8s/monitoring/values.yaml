@@ -1,0 +1,11 @@
+grafana:
+  adminUser: admin
+  adminPassword: prom-operator
+  service:
+    type: ClusterIP
+  persistence:
+    enabled: true
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false

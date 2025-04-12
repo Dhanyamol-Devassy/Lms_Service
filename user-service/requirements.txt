@@ -2,7 +2,6 @@ fastapi
 uvicorn
 sqlalchemy
 mysql-connector-python
-bcrypt
 pydantic
 python-dotenv
 gunicorn
@@ -16,6 +15,8 @@ pydantic[email]
 passlib
 python-jose
 dotenv
-
-
+prometheus-fastapi-instrumentator
+requests
+bcrypt==4.0.1
+pytest
 

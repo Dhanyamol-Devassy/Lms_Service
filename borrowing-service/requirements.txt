@@ -2,3 +2,6 @@ Flask>=2.2
 flask_sqlalchemy==3.1.1
 mysql-connector-python==8.2.0
 python-dotenv
+prometheus_flask_exporter
+requests
+requests_mock

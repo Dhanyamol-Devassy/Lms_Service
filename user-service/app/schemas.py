@@ -1,9 +1,15 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel,EmailStr
+from typing import List
+
+class BorrowedBook(BaseModel):
+    borrow_id: int
+    book_id: int
+    title: str
 
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
-    password: str  # Plain text, should be hashed before saving
+    password: str
 
 class UserResponse(BaseModel):
     id: int
@@ -18,7 +24,20 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-class TokenResponse(BaseModel):
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class UserShort(BaseModel):  # ✅ clean user info for token response
+    id: int
+    name: str
+    email: EmailStr
+    role: str
+
+    class Config:
+        orm_mode = True
+
+class LoginResponse(BaseModel):
+    user: UserShort
     access_token: str
     token_type: str = "bearer"
-
