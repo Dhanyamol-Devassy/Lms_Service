@@ -6,3 +6,5 @@ python-dotenv
 pydantic
 requests
 prometheus-fastapi-instrumentator
+python-jose
+python-jose[cryptography]

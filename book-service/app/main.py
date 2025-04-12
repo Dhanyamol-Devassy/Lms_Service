@@ -3,10 +3,19 @@ from app.routes import router as book_router
 from app.database import Base, engine
 from sqlalchemy.exc import OperationalError
 from prometheus_fastapi_instrumentator import Instrumentator
+from fastapi.middleware.cors import CORSMiddleware
 
 import time
 
 app = FastAPI(title="Book Service")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify allowed domains
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Wait for DB to be ready
 for i in range(10):

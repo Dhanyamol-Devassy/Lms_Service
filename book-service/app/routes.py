@@ -4,6 +4,8 @@ from app.database import get_db
 from app.models import Book
 from app.schemas import BookCreate, BookUpdate, BookResponse
 from dependencies.auth import require_roles
+from dependencies.auth import get_current_user
+
 
 router = APIRouter(prefix="/books", tags=["Books"])
 

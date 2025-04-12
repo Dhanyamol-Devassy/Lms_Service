@@ -9,15 +9,17 @@ bp = Blueprint("borrowing", __name__)
 
 USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://user-service:5001/users")
 BOOK_SERVICE_URL = os.getenv("BOOK_SERVICE_URL", "http://book-service:5002/books")
-
 @bp.route("/borrow", methods=["POST"])
 def borrow_book():
     user_id = request.json.get("user_id")
     book_id = request.json.get("book_id")
+    token = request.headers.get("Authorization")  # 👈 Get token from caller
+
+    headers = {"Authorization": token} if token else {}
 
     # Validate user
     try:
-        user_response = requests.get(f"{USER_SERVICE_URL}/{user_id}")
+        user_response = requests.get(f"{USER_SERVICE_URL}/{user_id}", headers=headers)
         if user_response.status_code == 404:
             return jsonify({"error": f"User {user_id} not found"}), 404
         elif user_response.status_code != 200:
@@ -27,7 +29,7 @@ def borrow_book():
 
     # Validate book
     try:
-        book_response = requests.get(f"{BOOK_SERVICE_URL}/{book_id}")
+        book_response = requests.get(f"{BOOK_SERVICE_URL}/{book_id}", headers=headers)
         if book_response.status_code == 404:
             return jsonify({"error": f"Book {book_id} not found"}), 404
         elif book_response.status_code != 200:
@@ -44,17 +46,19 @@ def borrow_book():
     db.session.add(borrowing)
     db.session.commit()
 
+    # Update book availability
     try:
-        requests.put(f"{BOOK_SERVICE_URL}/borrow/{book_id}?available=false")
+        requests.put(f"{BOOK_SERVICE_URL}/borrow/{book_id}?available=false", headers=headers)
     except requests.RequestException:
         return jsonify({"error": "Failed to update book availability"}), 503
 
     try:
-        requests.post(f"{USER_SERVICE_URL}/{user_id}/add-borrowed", json={"book_id": book_id})
+        requests.post(f"{USER_SERVICE_URL}/{user_id}/add-borrowed", json={"book_id": book_id}, headers=headers)
     except requests.RequestException:
         return jsonify({"error": "Failed to update user borrowed list"}), 503
 
     return jsonify({"message": "Book borrowed successfully"}), 200
+
 
 
 @bp.route("/return/<int:borrow_id>", methods=["PUT"])
@@ -63,7 +67,7 @@ def return_book(borrow_id):
     if not borrowing:
         return jsonify({"error": "Borrowing record not found"}), 404
 
-    borrowing.returned_at = datetime.utcnow()
+    #borrowing.returned_at = datetime.utcnow()
     db.session.commit()
 
     try:

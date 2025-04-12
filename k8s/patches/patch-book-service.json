@@ -1,0 +1,11 @@
+﻿{
+  "spec": {
+    "ports": [
+      {
+        "port": 5002,
+        "targetPort": 5002,
+        "name": "http"
+      }
+    ]
+  }
+}

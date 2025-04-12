@@ -1,0 +1,10 @@
+{
+    "spec": {
+      "serviceMonitorSelector": {
+        "matchLabels": {
+          "release": "kube-monitoring"
+        }
+      }
+    }
+  }
+  

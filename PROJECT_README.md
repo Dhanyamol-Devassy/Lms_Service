@@ -1,208 +1,116 @@
-
-# 📚 LMS Microservices Project
-
-This project is a microservices-based **Library Management System** built using **FastAPI**, **Flask**, **MySQL**, and **Docker Compose**. It includes:
-
-- `user-service`: User registration, login, and management (FastAPI + JWT)
-- `book-service`: CRUD operations for books (FastAPI)
-- `borrowing-service`: Manage book borrow/return actions (Flask)
-- `mysql`: MySQL server with an `init.sql` script for DB setup
-
+📚 Library Management System - README
+# 📚 Library Management System (Microservices Architecture)
+This project implements a modular Library Management System using microservices, Docker, Kubernetes, and GitHub Actions for CI/CD.
 ---
-
-## 📁 Project Structure
-
+## 🔍 Overview
+A scalable and secure Library Management System based on microservices architecture. Each service is independently deployable and managed.
+---
+## 📐 Architecture
+- Services communicate over HTTP using REST APIs.
+- JWT authentication for secured endpoints.
+- Kubernetes DNS for service discovery.
+- Minikube for local deployment.
+---
+## 🧩 Microservices
+1. **User Service** – FastAPI
+2. **Book Service** – FastAPI
+3. **Borrowing Service** – Flask
+Each service has its own MySQL database (polyglot persistence possible).
+---
+## 🛠️ Tech Stack
+- FastAPI, Flask, SQLAlchemy
+- Docker & Kubernetes (Minikube)
+- MySQL, Prometheus, Grafana
+- GitHub Actions for CI/CD
+---
+## 🗂️ Project Structure
 ```
-LMS_SERVICE/
+LMS_Service/
+│
 ├── user-service/
-│   ├── app/
-│   ├── .env.example
-│   ├── Dockerfile
-│   └── requirements.txt
 ├── book-service/
-│   ├── app/
-│   ├── .env.example
-│   ├── Dockerfile
-│   └── requirements.txt
 ├── borrowing-service/
-│   ├── app/
-│   ├── .env.example
-│   ├── Dockerfile
-│   └── requirements.txt
-├── mysql-init/
-│   └── init.sql
-├── wait-for.sh
+├── k8s/
+│   ├── user-service/
+│   ├── book-service/
+│   ├── borrowing-service/
+│   ├── monitoring/
+│   └── secrets/
+├── .github/workflows/
+│   └── ci-cd.yaml
 ├── docker-compose.yaml
-└── .env.example (optional global)
+└── README.md
 ```
-
 ---
-
-## ⚙️ Technologies
-
-- FastAPI (User & Book Service)
-- Flask (Borrowing Service)
-- MySQL (Central RDBMS)
-- Docker & Docker Compose
-- JWT (Authentication)
-- SQLAlchemy ORM
-- Kubernetes for container orchestration
-
----
-
-## 🚀 Getting Started
-
-### ✅ Prerequisites
-
-- Docker
-- Docker Compose
-- Kubernetes (Minikube or similar)
-- kubectl
-
-### 🛠️ Setup Instructions
-
-1. **Clone the repo**
+## 🚀 Setup Instructions
+### 1. Clone Repository
 ```bash
-git clone https://github.com/Dhanyamol-Devassy/Lms_Service.git
-cd LMS_SERVICE
-
+git clone https://github.com/<your-username>/LMS_Service.git
+cd LMS_Service
 ```
-
-2. **Make `wait-for.sh` executable**
+### 2. Start Minikube
 ```bash
-chmod +x wait-for.sh
+minikube start
 ```
-
-3. **Set up `.env` files**
-
-Each service has a `.env.example` file. Copy it to a new file named .env and fill in credentials:
-
-#### Global `.env.example`
-```
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_HOST=mysql
-DB_PORT=3306
-DB_NAME=your_default_db_name
-MYSQL_ROOT_PASSWORD=your_root_password
-```
-
-#### `user-service/.env.example`
-```
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_HOST=mysql
-DB_PORT=3306
-DB_NAME=lms_users
-DATABASE_URL=mysql+mysqlconnector://your_user:your_password@mysql:3306/lms_users
-SECRET_KEY=your_jwt_secret
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-JWT_SECRET_KEY=your_jwt_key
-```
-
-#### `book-service/.env.example`
-```
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_HOST=mysql
-DB_PORT=3306
-DB_NAME=lms_books
-DATABASE_URL=mysql+mysqlconnector://your_user:your_password@mysql:3306/lms_books
-```
-
-#### `borrowing-service/.env.example`
-```
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_HOST=mysql
-DB_PORT=3306
-DB_NAME=lms_borrowing
-DATABASE_URL=mysql+mysqlconnector://your_user:your_password@mysql:3306/lms_borrowing
-```
-
-4. **Build and start containers**
+### 3. Use Docker with Minikube
 ```bash
-docker-compose up --build
+minikube -p minikube docker-env --shell powershell | Invoke-Expression
 ```
-
-5. **Access services**
-- User Service: http://localhost:5001/docs
-- Book Service: http://localhost:5002/docs
-- Borrowing Service: http://localhost:5003
-
----
-
-## 🔐 Authentication
-
-- JWT used in user-service
-- After login, use `access_token` as Bearer token in `Authorization` header
-
----
-
-## 🧪 API Testing
-
-Test endpoints with:
-- Swagger UI (`/docs` on FastAPI services)
-- Postman / Insomnia / cURL
-
----
-
-## Kubernetes Setup
-```
-Run the following commands to apply the MySQL, user, book, and borrowing services to Kubernetes:
-
-kubectl apply -f mysql-secret.yaml
-kubectl apply -f mysql-configmap.yaml
-kubectl apply -f user-service-deployment.yaml
-kubectl apply -f book-service-deployment.yaml
-kubectl apply -f borrowing-service-deployment.yaml
-Repeat this for all the yaml files inside K8s/..
-```
-
-## Access via Port-Forwarding (for ClusterIP services)
-```
-Since services are of type ClusterIP, we can port-forward to access them locally.
-
-kubectl port-forward service/book-service 5002:5002
-kubectl port-forward service/user-service 5001:5001
-kubectl port-forward service/borrowing-service 5003:5003
-
-```
-
-## 📄 Environment Security Tips
-
-**Don't commit your `.env` files** with real credentials. Always use `.env.example` with placeholders like:
-
-```
-DB_USER=your_user
-DB_PASSWORD=your_password
-```
-
----
-
-## 🧰 Common Docker Commands
-
+### 4. Build Docker Images
 ```bash
-docker-compose down           # Stop containers
-docker-compose down -v       # Remove containers & volumes
-docker-compose up --build    # Rebuild and start all
-docker-compose up user-service --build  # Rebuild specific service
+docker build -t user-service:latest ./user-service
+docker build -t book-service:latest ./book-service
+docker build -t borrowing-service:latest ./borrowing-service
 ```
-
+### 5. Apply Kubernetes Files
+```bash
+kubectl apply -f k8s/
+```
+### 6. Access Application
+- Use `kubectl get svc` to get service IPs.
+- Forward ports using:
+```bash
+kubectl port-forward svc/user-service 5001:5001
+```
 ---
-
-## 👥 Contributors
-
-- Dhanyamol Devassy
-
+## 🔄 CI/CD Pipeline
+- Triggered on push to `main`
+- Actions:
+  - Run unit tests
+  - Build Docker images
+  - Apply K8s manifests
+- Demonstrates rolling updates
 ---
-
-## 📌 Notes
-
-- `mysql-init/init.sql` initializes all databases/tables
-- `wait-for.sh` ensures services wait for MySQL readiness
-- Each service logs DB status when ready
-
+## 📡 API Endpoints
+### User Service
+- `POST /users/`
+- `GET /users/`
+- `GET /users/{id}`
+- `PUT /users/{id}`
+- `DELETE /users/{id}`
+### Book Service
+- `POST /books/`
+- `GET /books/`
+- `PUT /books/{id}`
+- `DELETE /books/{id}`
+- `PUT /books/borrow/{id}`
+### Borrowing Service
+- `POST /borrow`
+- `PUT /return/{borrow_id}`
+---
+## 🧪 Testing
+- Unit tests with `pytest`
+- Integration tests to simulate service interaction
+- End-to-end tests validate complete flow
+---
+## 📊 Monitoring and Logging
+- Prometheus + Grafana dashboards
+- ELK stack (optional) for centralized logging
+- Metrics exposed on `/metrics`
+---
+## 🔐 Security
+- JWT for authentication
+- Role-Based Access Control (RBAC)
+- Secrets managed with Kubernetes
 ---
 

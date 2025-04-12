@@ -14,15 +14,18 @@ USE lms_users;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
+    name VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
+    password VARCHAR(255),
+    role VARCHAR(50),  -- ✅ Add this line
+    borrowed_books TEXT
 );
 
--- Sample users with bcrypt-hashed passwords
-INSERT INTO users (name, email, password) VALUES
-('Alice Smith', 'alice@example.com', '$2b$12$on3.rwWZ8hSDZ6lCNEf3ruSTuRhULqP1gubzOcKAsz6tx1d0E4zQa'),
-('Bob Johnson', 'bob@example.com', '$2b$12$gNPi7r9oeSTnW9BePB2fweAJoUmEejG5Uby14NKLgiKIK1JhN1VqG');
+
+-- Sample users with bcrypt-hashed passwords and roles
+INSERT INTO users (name, email, password, role) VALUES
+('Alice Smith', 'alice@example.com', '$2b$12$on3.rwWZ8hSDZ6lCNEf3ruSTuRhULqP1gubzOcKAsz6tx1d0E4zQa', 'admin'),
+('Bob Johnson', 'bob@example.com', '$2b$12$gNPi7r9oeSTnW9BePB2fweAJoUmEejG5Uby14NKLgiKIK1JhN1VqG', 'librarian');
 
 -- lms_books schema
 USE lms_books;

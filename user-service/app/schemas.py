@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
+    role: str
 
 class UserResponse(BaseModel):
     id: int
@@ -25,7 +26,7 @@ class UserLogin(BaseModel):
     password: str
 
 class LoginRequest(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
 class UserShort(BaseModel):  # ✅ clean user info for token response

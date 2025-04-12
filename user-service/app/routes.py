@@ -45,7 +45,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_password = hash_password(user.password)
-    new_user = User(name=user.name, email=user.email, password=hashed_password)
+    new_user = User(name=user.name, email=user.email, password=hashed_password, role=user.role)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -165,3 +165,13 @@ def remove_borrowed_book(user_id: int, payload: dict, db: Session = Depends(get_
         db.commit()
 
     return {"message": "Book removed from borrowed list"}
+
+@router.post("/login", tags=["Authentication"])
+def login(credentials: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == credentials.email).first()
+    if not user or not verify_password(credentials.password, user.password):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    token_data = {"sub": user.email, "role": user.role}
+    access_token = create_access_token(data=token_data)
+    return {"access_token": access_token, "token_type": "bearer"}

@@ -5,5 +5,5 @@ from datetime import datetime
 class BorrowingSchema:
     user_id: int
     book_id: int
-    borrowed_at: datetime = None
-    returned_at: datetime = None
+    #borrowed_at: datetime = None
+    #returned_at: datetime = None
