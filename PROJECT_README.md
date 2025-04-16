@@ -97,7 +97,12 @@ kubectl port-forward svc/user-service 5001:5001
 ### Borrowing Service
 - `POST /borrow`
 - `PUT /return/{borrow_id}`
----
+
+## 📡 Roles
+ - Admin
+ - Librarian
+ - Student
+
 ## 🧪 Testing
 - Unit tests with `pytest`
 - Integration tests to simulate service interaction
